@@ -70,30 +70,8 @@ impl Deck {
         Deck { cards }
     }
 
-    fn peek_two(&mut self) {
-        loop {
-            self.shuffle_deck();
-
-            let first_player_card = &self.cards[self.cards.len()-1];
-            let second_player_card = &self.cards[self.cards.len()-2];
-
-            println!("First player's card is {}", first_player_card.reveal());
-            println!("Second player's card is {}", second_player_card.reveal());
-
-            if RANK_VALUES.get(&first_player_card.rank) == RANK_VALUES.get(&second_player_card.rank) {
-                println!("Draw again!");
-            }
-
-            if RANK_VALUES.get(&first_player_card.rank) > RANK_VALUES.get(&second_player_card.rank) {
-                println!("First player goes first.");
-                break;
-            }
-            if RANK_VALUES.get(&first_player_card.rank) < RANK_VALUES.get(&second_player_card.rank) {
-                println!("Second player goes first.");
-                break;
-            }
-        }
-        println!(" ");
+    fn peek_two(&self) -> (&Card, &Card) {
+        (&self.cards[self.cards.len()-1], &self.cards[self.cards.len()-2])
     }
 
     fn shuffle_deck(&mut self) {
@@ -115,6 +93,7 @@ struct GinGame {
     second_player_hand: Vec<Card>,
     deck: Deck,
     discard_pile: Vec<Card>,
+    current_turn: String,
 }
 
 impl GinGame {
@@ -123,7 +102,8 @@ impl GinGame {
         let discard_pile = Vec::new();
         let first_player_hand = Vec::new();
         let second_player_hand = Vec::new();
-        GinGame { first_player_hand, second_player_hand, deck, discard_pile}
+        let current_turn = String::from("");
+        GinGame { first_player_hand, second_player_hand, deck, discard_pile, current_turn }
     }
 
     fn deal_starting_hands(&mut self) {
@@ -160,11 +140,38 @@ impl GinGame {
         }
         println!(" ");
     }
+
+    fn decide_first_turn(&mut self) {
+        loop {
+            self.deck.shuffle_deck();
+
+            let (first_player_card, second_player_card) = self.deck.peek_two();
+
+            println!("First player's card is {}", first_player_card.reveal());
+            println!("Second player's card is {}", second_player_card.reveal());
+
+            if RANK_VALUES.get(&first_player_card.rank) == RANK_VALUES.get(&second_player_card.rank) {
+                println!("Draw again!");
+            }
+
+            if RANK_VALUES.get(&first_player_card.rank) > RANK_VALUES.get(&second_player_card.rank) {
+                println!("First player goes first.");
+                self.current_turn = String::from("First player");
+                break;
+            }
+            if RANK_VALUES.get(&first_player_card.rank) < RANK_VALUES.get(&second_player_card.rank) {
+                println!("Second player goes first.");
+                self.current_turn = String::from("Second player");
+                break;
+            }
+        }
+        println!(" ");
+    }
 }
 
 fn main() {
     let mut game = GinGame::new();
-    game.deck.peek_two();
+    game.decide_first_turn();
     game.deal_starting_hands();
 
     game.display_first_player_hand();
