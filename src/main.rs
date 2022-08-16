@@ -24,6 +24,7 @@ const RANKS: [&str; 13] = [
     "Two",
 ];
 
+#[derive(Debug)]
 struct Card {
     suit: String,
     rank: String,
@@ -53,19 +54,48 @@ impl Deck {
     }
 
     fn peek_top(&self) {
-        println!("Top card is {}", self.cards[0].reveal());
+        println!("Top card is {}", self.cards[self.cards.len()-1].reveal());
     }
 
     fn shuffle_deck(&mut self) {
         self.cards.shuffle(&mut thread_rng());
     }
+
+    fn draw_card(&mut self, player_hand: &mut Vec<Card>) {
+        self.shuffle_deck();
+        let drawn_card = self.cards.pop();
+        match drawn_card {
+            None => panic!("no more cards left!"),
+            Some(card) => player_hand.push(card),
+        };
+    }
+}
+
+struct GinGame {
+    first_player_hand: Vec<Card>,
+    second_player_hand: Vec<Card>,
+    deck: Deck,
+    discard_pile: Vec<Card>,
+}
+
+impl GinGame {
+    fn new() -> Self {
+        let mut deck = Deck::create();
+        let discard_pile = Vec::new();
+        let first_player_hand = Vec::new();
+        let second_player_hand = Vec::new();
+
+
+
+        GinGame { first_player_hand, second_player_hand, deck, discard_pile}
+    }
 }
 
 fn main() {
-    let mut deck = Deck::create();
+    let mut game = GinGame::new();
+    game.deck.draw_card(&mut game.first_player_hand);
 
-    println!("Deck has {} many cards.", deck.cards.len());
-    deck.peek_top();
-    deck.shuffle_deck();
-    deck.peek_top();
+    println!("{:?}", game.first_player_hand);
+    println!("{:?}", game.deck.cards.len());
+
 }
