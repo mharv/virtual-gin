@@ -80,22 +80,46 @@ struct GinGame {
 
 impl GinGame {
     fn new() -> Self {
-        let mut deck = Deck::create();
+        let deck = Deck::create();
         let discard_pile = Vec::new();
         let first_player_hand = Vec::new();
         let second_player_hand = Vec::new();
-
-
-
         GinGame { first_player_hand, second_player_hand, deck, discard_pile}
+    }
+
+    fn deal_starting_hands(&mut self) {
+        self.deck.shuffle_deck();
+        for _ in 0..10 {
+            self.deck.draw_card(&mut self.first_player_hand);
+            self.deck.draw_card(&mut self.second_player_hand);
+        }
+    }
+
+    fn display_first_player_hand(&self) {
+        println!("First player's hand: ");
+        for card in self.first_player_hand.iter() {
+            println!("{:?}", card);
+        }
+        println!(" ");
+    }
+
+    fn display_second_player_hand(&self) {
+        println!("Second player's hand: ");
+        for card in self.second_player_hand.iter() {
+            println!("{:?}", card);
+        }
+        println!(" ");
     }
 }
 
 fn main() {
     let mut game = GinGame::new();
-    game.deck.draw_card(&mut game.first_player_hand);
+    game.deal_starting_hands();
 
-    println!("{:?}", game.first_player_hand);
     println!("{:?}", game.deck.cards.len());
+
+    game.display_first_player_hand();
+    game.display_second_player_hand();
+
 
 }
