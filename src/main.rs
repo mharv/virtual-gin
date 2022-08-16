@@ -61,12 +61,12 @@ impl Deck {
         self.cards.shuffle(&mut thread_rng());
     }
 
-    fn draw_card(&mut self, player_hand: &mut Vec<Card>) {
+    fn draw_card(&mut self, destination: &mut Vec<Card>) {
         self.shuffle_deck();
         let drawn_card = self.cards.pop();
         match drawn_card {
             None => panic!("no more cards left!"),
-            Some(card) => player_hand.push(card),
+            Some(card) => destination.push(card),
         };
     }
 }
@@ -93,12 +93,13 @@ impl GinGame {
             self.deck.draw_card(&mut self.first_player_hand);
             self.deck.draw_card(&mut self.second_player_hand);
         }
+        self.deck.draw_card(& mut self.discard_pile);
     }
 
     fn display_first_player_hand(&self) {
         println!("First player's hand: ");
         for card in self.first_player_hand.iter() {
-            println!("{:?}", card);
+            println!("{}", card.reveal());
         }
         println!(" ");
     }
@@ -106,7 +107,17 @@ impl GinGame {
     fn display_second_player_hand(&self) {
         println!("Second player's hand: ");
         for card in self.second_player_hand.iter() {
-            println!("{:?}", card);
+            println!("{}", card.reveal());
+        }
+        println!(" ");
+    }
+
+    fn display_discard_pile(&self) {
+        println!("Top card of discard pile: ");
+        if self.discard_pile.len() == 0 {
+            println!("Discard pile is empty!");
+        } else {
+            println!("{}", self.discard_pile[self.discard_pile.len()-1].reveal());
         }
         println!(" ");
     }
@@ -120,6 +131,7 @@ fn main() {
 
     game.display_first_player_hand();
     game.display_second_player_hand();
+    game.display_discard_pile();
 
 
 }
