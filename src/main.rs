@@ -71,24 +71,29 @@ impl Deck {
     }
 
     fn peek_two(&mut self) {
-        self.shuffle_deck();
-        let mut fp_index_offset = 1;
-        let mut sp_index_offset = 2;
+        loop {
+            self.shuffle_deck();
 
-        let first_player_card = &self.cards[self.cards.len()-fp_index_offset];
-        let second_player_card = &self.cards[self.cards.len()-sp_index_offset];
+            let first_player_card = &self.cards[self.cards.len()-1];
+            let second_player_card = &self.cards[self.cards.len()-2];
 
-        println!("First player's card is {}", first_player_card.reveal());
-        println!("Second player's card is {}", second_player_card.reveal());
+            println!("First player's card is {}", first_player_card.reveal());
+            println!("Second player's card is {}", second_player_card.reveal());
 
-        if RANK_VALUES.get(&first_player_card.rank) == RANK_VALUES.get(&second_player_card.rank) {
-            println!("Draw again!");
+            if RANK_VALUES.get(&first_player_card.rank) == RANK_VALUES.get(&second_player_card.rank) {
+                println!("Draw again!");
+            }
+
+            if RANK_VALUES.get(&first_player_card.rank) > RANK_VALUES.get(&second_player_card.rank) {
+                println!("First player goes first.");
+                break;
+            }
+            if RANK_VALUES.get(&first_player_card.rank) < RANK_VALUES.get(&second_player_card.rank) {
+                println!("Second player goes first.");
+                break;
+            }
         }
-        if RANK_VALUES.get(&first_player_card.rank) > RANK_VALUES.get(&second_player_card.rank) {
-            println!("First player goes first.");
-        } else {
-            println!("Second player goes first.");
-        }
+        println!(" ");
     }
 
     fn shuffle_deck(&mut self) {
@@ -161,8 +166,6 @@ fn main() {
     let mut game = GinGame::new();
     game.deck.peek_two();
     game.deal_starting_hands();
-
-    println!("{:?}", game.deck.cards.len());
 
     game.display_first_player_hand();
     game.display_second_player_hand();
