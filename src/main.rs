@@ -1,5 +1,22 @@
 use rand::thread_rng;
 use rand::seq::SliceRandom;
+use phf::phf_map;
+
+static RANK_VALUES: phf::Map<&'static str, i32> = phf_map! {
+    "Ace" => 1,
+    "King"=> 13,
+    "Queen" => 12,
+    "Jack" => 11,
+    "Ten" => 10,
+    "Nine" => 9,
+    "Eight" => 8,
+    "Seven" => 7,
+    "Six" => 6,
+    "Five" => 5,
+    "Four" => 4,
+    "Three" => 3,
+    "Two" => 2,
+};
 
 const SUITS: [&str; 4] = [
     "Clubs",
@@ -53,8 +70,25 @@ impl Deck {
         Deck { cards }
     }
 
-    fn peek_top(&self) {
-        println!("Top card is {}", self.cards[self.cards.len()-1].reveal());
+    fn peek_two(&mut self) {
+        self.shuffle_deck();
+        let mut fp_index_offset = 1;
+        let mut sp_index_offset = 2;
+
+        let first_player_card = &self.cards[self.cards.len()-fp_index_offset];
+        let second_player_card = &self.cards[self.cards.len()-sp_index_offset];
+
+        println!("First player's card is {}", first_player_card.reveal());
+        println!("Second player's card is {}", second_player_card.reveal());
+
+        if RANK_VALUES.get(&first_player_card.rank) == RANK_VALUES.get(&second_player_card.rank) {
+            println!("Draw again!");
+        }
+        if RANK_VALUES.get(&first_player_card.rank) > RANK_VALUES.get(&second_player_card.rank) {
+            println!("First player goes first.");
+        } else {
+            println!("Second player goes first.");
+        }
     }
 
     fn shuffle_deck(&mut self) {
@@ -125,6 +159,7 @@ impl GinGame {
 
 fn main() {
     let mut game = GinGame::new();
+    game.deck.peek_two();
     game.deal_starting_hands();
 
     println!("{:?}", game.deck.cards.len());
