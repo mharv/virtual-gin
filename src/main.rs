@@ -88,9 +88,28 @@ impl Deck {
     }
 }
 
+struct Player {
+    name: String,
+    hand: Vec<Card>,
+}
+
+impl Player {
+    fn new(name: String) -> Self {
+        Player { name, hand: Vec::new() }
+    }
+
+    fn display_player_hand(&self) {
+        println!("{}'s hand: ", self.name);
+        for card in self.hand.iter() {
+            println!("{}", card.reveal());
+        }
+        println!(" ");
+    }
+}
+
 struct GinGame {
-    first_player_hand: Vec<Card>,
-    second_player_hand: Vec<Card>,
+    first_player: Player,
+    second_player: Player,
     deck: Deck,
     discard_pile: Vec<Card>,
     current_turn: String,
@@ -100,35 +119,19 @@ impl GinGame {
     fn new() -> Self {
         let deck = Deck::create();
         let discard_pile = Vec::new();
-        let first_player_hand = Vec::new();
-        let second_player_hand = Vec::new();
+        let first_player = Player::new(String::from("Mitch"));
+        let second_player = Player::new(String::from("Phoebe"));
         let current_turn = String::from("");
-        GinGame { first_player_hand, second_player_hand, deck, discard_pile, current_turn }
+        GinGame { first_player, second_player, deck, discard_pile, current_turn }
     }
 
     fn deal_starting_hands(&mut self) {
         self.deck.shuffle_deck();
         for _ in 0..10 {
-            self.deck.draw_card(&mut self.first_player_hand);
-            self.deck.draw_card(&mut self.second_player_hand);
+            self.deck.draw_card(&mut self.first_player.hand);
+            self.deck.draw_card(&mut self.second_player.hand);
         }
         self.deck.draw_card(& mut self.discard_pile);
-    }
-
-    fn display_first_player_hand(&self) {
-        println!("First player's hand: ");
-        for card in self.first_player_hand.iter() {
-            println!("{}", card.reveal());
-        }
-        println!(" ");
-    }
-
-    fn display_second_player_hand(&self) {
-        println!("Second player's hand: ");
-        for card in self.second_player_hand.iter() {
-            println!("{}", card.reveal());
-        }
-        println!(" ");
     }
 
     fn display_discard_pile(&self) {
@@ -147,21 +150,22 @@ impl GinGame {
 
             let (first_player_card, second_player_card) = self.deck.peek_two();
 
-            println!("First player's card is {}", first_player_card.reveal());
-            println!("Second player's card is {}", second_player_card.reveal());
+            println!("{}'s card is {}", self.first_player.name, first_player_card.reveal());
+            println!("{}'s card is {}", self.second_player.name, second_player_card.reveal());
 
             if RANK_VALUES.get(&first_player_card.rank) == RANK_VALUES.get(&second_player_card.rank) {
                 println!("Draw again!");
+                println!(" ");
             }
 
             if RANK_VALUES.get(&first_player_card.rank) > RANK_VALUES.get(&second_player_card.rank) {
-                println!("First player goes first.");
-                self.current_turn = String::from("First player");
+                println!("{} goes first.", self.first_player.name);
+                self.current_turn = self.first_player.name.clone();
                 break;
             }
             if RANK_VALUES.get(&first_player_card.rank) < RANK_VALUES.get(&second_player_card.rank) {
-                println!("Second player goes first.");
-                self.current_turn = String::from("Second player");
+                println!("{} goes first.", self.second_player.name);
+                self.current_turn = self.second_player.name.clone();
                 break;
             }
         }
@@ -174,8 +178,8 @@ fn main() {
     game.decide_first_turn();
     game.deal_starting_hands();
 
-    game.display_first_player_hand();
-    game.display_second_player_hand();
+    game.first_player.display_player_hand();
+    game.second_player.display_player_hand();
     game.display_discard_pile();
 
 
