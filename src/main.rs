@@ -116,11 +116,11 @@ struct GinGame {
 }
 
 impl GinGame {
-    fn new() -> Self {
+    fn new(first_player_name: String, second_player_name: String) -> Self {
         let deck = Deck::create();
         let discard_pile = Vec::new();
-        let first_player = Player::new(String::from("Mitch"));
-        let second_player = Player::new(String::from("Phoebe"));
+        let first_player = Player::new(first_player_name);
+        let second_player = Player::new(second_player_name);
         let current_turn = String::from("");
         GinGame { first_player, second_player, deck, discard_pile, current_turn }
     }
@@ -174,7 +174,7 @@ impl GinGame {
 }
 
 fn main() {
-    let mut game = GinGame::new();
+    let mut game = GinGame::new(String::from("Mitch"), String::from("Phoebe"));
     game.decide_first_turn();
     game.deal_starting_hands();
 
