@@ -1,6 +1,6 @@
-use rand::thread_rng;
-use rand::seq::SliceRandom;
 use phf::phf_map;
+use rand::seq::SliceRandom;
+use rand::thread_rng;
 
 static RANK_VALUES: phf::Map<&'static str, i32> = phf_map! {
     "Ace" => 1,
@@ -18,27 +18,11 @@ static RANK_VALUES: phf::Map<&'static str, i32> = phf_map! {
     "Two" => 2,
 };
 
-const SUITS: [&str; 4] = [
-    "Clubs",
-    "Spades",
-    "Diamonds",
-    "Hearts",
-];
+const SUITS: [&str; 4] = ["Clubs", "Spades", "Diamonds", "Hearts"];
 
 const RANKS: [&str; 13] = [
-    "Ace",
-    "King",
-    "Queen",
-    "Jack",
-    "Ten",
-    "Nine",
-    "Eight",
-    "Seven",
-    "Six",
-    "Five",
-    "Four",
-    "Three",
-    "Two",
+    "Ace", "King", "Queen", "Jack", "Ten", "Nine", "Eight", "Seven", "Six", "Five", "Four",
+    "Three", "Two",
 ];
 
 #[derive(Debug)]
@@ -64,14 +48,17 @@ impl Deck {
             for rank in RANKS {
                 let suit = String::from(suit);
                 let rank = String::from(rank);
-                cards.push(Card { suit , rank });
+                cards.push(Card { suit, rank });
             }
         }
         Deck { cards }
     }
 
     fn peek_two(&self) -> (&Card, &Card) {
-        (&self.cards[self.cards.len()-1], &self.cards[self.cards.len()-2])
+        (
+            &self.cards[self.cards.len() - 1],
+            &self.cards[self.cards.len() - 2],
+        )
     }
 
     fn shuffle_deck(&mut self) {
@@ -79,11 +66,10 @@ impl Deck {
     }
 
     fn draw_card(&mut self, destination: &mut Vec<Card>) {
-        self.shuffle_deck();
         let drawn_card = self.cards.pop();
         match drawn_card {
-            None => panic!("no more cards left!"),
             Some(card) => destination.push(card),
+            None => panic!("no more cards left!"),
         };
     }
 }
@@ -95,7 +81,10 @@ struct Player {
 
 impl Player {
     fn new(name: String) -> Self {
-        Player { name, hand: Vec::new() }
+        Player {
+            name,
+            hand: Vec::new(),
+        }
     }
 
     fn display_player_hand(&self) {
@@ -122,7 +111,13 @@ impl GinGame {
         let first_player = Player::new(first_player_name);
         let second_player = Player::new(second_player_name);
         let current_turn = String::from("");
-        GinGame { first_player, second_player, deck, discard_pile, current_turn }
+        GinGame {
+            first_player,
+            second_player,
+            deck,
+            discard_pile,
+            current_turn,
+        }
     }
 
     fn deal_starting_hands(&mut self) {
@@ -131,7 +126,7 @@ impl GinGame {
             self.deck.draw_card(&mut self.first_player.hand);
             self.deck.draw_card(&mut self.second_player.hand);
         }
-        self.deck.draw_card(& mut self.discard_pile);
+        self.deck.draw_card(&mut self.discard_pile);
     }
 
     fn display_discard_pile(&self) {
@@ -139,9 +134,22 @@ impl GinGame {
         if self.discard_pile.len() == 0 {
             println!("Discard pile is empty!");
         } else {
-            println!("{}", self.discard_pile[self.discard_pile.len()-1].reveal());
+            println!(
+                "{}",
+                self.discard_pile[self.discard_pile.len() - 1].reveal()
+            );
         }
         println!(" ");
+    }
+
+    fn get_current_turn(&mut self) -> &str {
+        &self.current_turn
+    }
+
+    fn awaiting_action(&mut self) {
+        println!("awaiting input...");
+        let temp_current_turn = self.current_turn.clone();
+        while self.get_current_turn() == temp_current_turn {}
     }
 
     fn decide_first_turn(&mut self) {
@@ -150,20 +158,31 @@ impl GinGame {
 
             let (first_player_card, second_player_card) = self.deck.peek_two();
 
-            println!("{}'s card is {}", self.first_player.name, first_player_card.reveal());
-            println!("{}'s card is {}", self.second_player.name, second_player_card.reveal());
+            println!(
+                "{}'s card is {}",
+                self.first_player.name,
+                first_player_card.reveal()
+            );
+            println!(
+                "{}'s card is {}",
+                self.second_player.name,
+                second_player_card.reveal()
+            );
 
-            if RANK_VALUES.get(&first_player_card.rank) == RANK_VALUES.get(&second_player_card.rank) {
+            if RANK_VALUES.get(&first_player_card.rank) == RANK_VALUES.get(&second_player_card.rank)
+            {
                 println!("Draw again!");
                 println!(" ");
             }
 
-            if RANK_VALUES.get(&first_player_card.rank) > RANK_VALUES.get(&second_player_card.rank) {
+            if RANK_VALUES.get(&first_player_card.rank) > RANK_VALUES.get(&second_player_card.rank)
+            {
                 println!("{} goes first.", self.first_player.name);
                 self.current_turn = self.first_player.name.clone();
                 break;
             }
-            if RANK_VALUES.get(&first_player_card.rank) < RANK_VALUES.get(&second_player_card.rank) {
+            if RANK_VALUES.get(&first_player_card.rank) < RANK_VALUES.get(&second_player_card.rank)
+            {
                 println!("{} goes first.", self.second_player.name);
                 self.current_turn = self.second_player.name.clone();
                 break;
@@ -182,5 +201,6 @@ fn main() {
     game.second_player.display_player_hand();
     game.display_discard_pile();
 
-
+    println!("{}", game.get_current_turn());
+    game.awaiting_action();
 }
