@@ -172,7 +172,7 @@ impl GinGame {
         &self.current_turn
     }
 
-    fn awaiting_action(&mut self) {
+    fn awaiting_draw(&mut self) {
         println!("either draw a card from the deck (d1) or draw a card from the discard pile (d2) awaiting input...");
         let temp_current_turn = self.current_turn.clone();
         let mut input = String::new();
@@ -244,5 +244,5 @@ fn main() {
     game.display_discard_pile();
 
     println!("{}", game.get_current_turn());
-    game.awaiting_action();
+    game.awaiting_draw();
 }
