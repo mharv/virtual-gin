@@ -40,6 +40,29 @@ impl Card {
     }
 }
 
+struct DiscardPile {
+    cards: Vec<Card>,
+}
+
+impl DiscardPile {
+    fn create() -> Self {
+        DiscardPile { cards: Vec::new() }
+    }
+
+    fn draw_card(&mut self, destination: &mut Vec<Card>) {
+        let drawn_card = self.cards.pop();
+        match drawn_card {
+            Some(card) => destination.push(card),
+            None => panic!("no more cards left!"),
+        };
+    }
+
+    fn discard_card(&mut self, origin: &mut Vec<Card>, card_index: usize) {
+        let card = origin.remove(card_index);
+        self.cards.push(card);
+    }
+}
+
 struct Deck {
     cards: Vec<Card>,
 }
@@ -103,14 +126,14 @@ struct GinGame {
     first_player: Player,
     second_player: Player,
     deck: Deck,
-    discard_pile: Vec<Card>,
+    discard_pile: DiscardPile,
     current_turn: String,
 }
 
 impl GinGame {
     fn new(first_player_name: String, second_player_name: String) -> Self {
         let deck = Deck::create();
-        let discard_pile = Vec::new();
+        let discard_pile = DiscardPile::create();
         let first_player = Player::new(first_player_name);
         let second_player = Player::new(second_player_name);
         let current_turn = String::from("");
@@ -129,17 +152,17 @@ impl GinGame {
             self.deck.draw_card(&mut self.first_player.hand);
             self.deck.draw_card(&mut self.second_player.hand);
         }
-        self.deck.draw_card(&mut self.discard_pile);
+        self.deck.draw_card(&mut self.discard_pile.cards);
     }
 
     fn display_discard_pile(&self) {
         println!("Top card of discard pile: ");
-        if self.discard_pile.len() == 0 {
+        if self.discard_pile.cards.len() == 0 {
             println!("Discard pile is empty!");
         } else {
             println!(
                 "{}",
-                self.discard_pile[self.discard_pile.len() - 1].reveal()
+                self.discard_pile.cards[self.discard_pile.cards.len() - 1].reveal()
             );
         }
         println!(" ");
@@ -161,8 +184,11 @@ impl GinGame {
                 "d1" => {
                     self.deck.draw_card(&mut self.first_player.hand);
                     self.first_player.display_player_hand();
+                }
+                "d2" => {
+                    self.discard_pile.draw_card(&mut self.first_player.hand);
+                    self.first_player.display_player_hand();
                 },
-                "d2" => println!("Cant draw discarded cards right now..."),
                 _ => println!("Invalid command."),
             }
         }
