@@ -1,3 +1,6 @@
+use std::fmt::Error;
+use std::io;
+
 use phf::phf_map;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
@@ -147,9 +150,22 @@ impl GinGame {
     }
 
     fn awaiting_action(&mut self) {
-        println!("awaiting input...");
+        println!("either draw a card from the deck (d1) or draw a card from the discard pile (d2) awaiting input...");
         let temp_current_turn = self.current_turn.clone();
-        while self.get_current_turn() == temp_current_turn {}
+        let mut input = String::new();
+        while self.get_current_turn() == temp_current_turn {
+            input.clear();
+            io::stdin().read_line(&mut input).unwrap();
+            // need to put in get current player logic
+            match input.trim() {
+                "d1" => {
+                    self.deck.draw_card(&mut self.first_player.hand);
+                    self.first_player.display_player_hand();
+                },
+                "d2" => println!("Cant draw discarded cards right now..."),
+                _ => println!("Invalid command."),
+            }
+        }
     }
 
     fn decide_first_turn(&mut self) {
