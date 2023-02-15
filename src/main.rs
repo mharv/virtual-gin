@@ -176,20 +176,38 @@ impl GinGame {
         println!("either draw a card from the deck (d1) or draw a card from the discard pile (d2) awaiting input...");
         let temp_current_turn = self.current_turn.clone();
         let mut input = String::new();
+
+        // should the below be something to do with state?
         while self.get_current_turn() == temp_current_turn {
             input.clear();
             io::stdin().read_line(&mut input).unwrap();
             // need to put in get current player logic
             match input.trim() {
                 "d1" => {
-                    self.deck.draw_card(&mut self.first_player.hand);
-                    self.first_player.display_player_hand();
+                    if self.current_turn == self.first_player.name {
+                        self.deck.draw_card(&mut self.first_player.hand);
+                        self.first_player.display_player_hand();
+                    } else {
+                        self.deck.draw_card(&mut self.second_player.hand);
+                        self.second_player.display_player_hand();
+                    }
                 }
                 "d2" => {
-                    self.discard_pile.draw_card(&mut self.first_player.hand);
-                    self.first_player.display_player_hand();
-                },
+                    if self.current_turn == self.first_player.name {
+                        self.discard_pile.draw_card(&mut self.first_player.hand);
+                        self.first_player.display_player_hand();
+                    } else {
+                        self.discard_pile.draw_card(&mut self.second_player.hand);
+                        self.second_player.display_player_hand();
+                    }
+                }
                 _ => println!("Invalid command."),
+            }
+
+            if self.current_turn == self.first_player.name {
+                self.current_turn = self.second_player.name.clone();
+            } else {
+                self.current_turn = self.first_player.name.clone();
             }
         }
     }
@@ -243,6 +261,8 @@ fn main() {
     game.second_player.display_player_hand();
     game.display_discard_pile();
 
-    println!("{}", game.get_current_turn());
-    game.awaiting_draw();
+    loop {
+        println!("{}", game.get_current_turn());
+        game.awaiting_draw();
+    }
 }
