@@ -172,6 +172,14 @@ impl GinGame {
         &self.current_turn
     }
 
+    fn set_next_turn(&mut self) {
+        if self.current_turn == self.first_player.name {
+            self.current_turn = self.second_player.name.clone();
+        } else {
+            self.current_turn = self.first_player.name.clone();
+        }
+    }
+
     fn awaiting_draw(&mut self) {
         println!("either draw a card from the deck (d1) or draw a card from the discard pile (d2) awaiting input...");
         let mut input = String::new();
@@ -208,11 +216,7 @@ impl GinGame {
 
 
         // next players turn.
-        if self.current_turn == self.first_player.name {
-            self.current_turn = self.second_player.name.clone();
-        } else {
-            self.current_turn = self.first_player.name.clone();
-        }
+        self.set_next_turn();
     }
 
     fn decide_first_turn(&mut self) {
