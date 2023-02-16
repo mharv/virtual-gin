@@ -239,8 +239,20 @@ impl GinGame {
             }
 
             match number {
-                0 => println!("discarding card 0"),
-                _ => println!("input is valid"),
+                number => {
+                    let fp_name = self.first_player.name.clone();
+                    if self.get_current_turn() == fp_name {
+                        self.discard_pile
+                            .discard_card(&mut self.first_player.hand, number);
+                        self.display_discard_pile();
+                        break;
+                    } else {
+                        self.discard_pile
+                            .discard_card(&mut self.second_player.hand, number);
+                        self.display_discard_pile();
+                        break;
+                    }
+                }
             }
         }
     }
