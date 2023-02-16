@@ -115,8 +115,8 @@ impl Player {
 
     fn display_player_hand(&self) {
         println!("{}'s hand: ", self.name);
-        for card in self.hand.iter() {
-            println!("{}", card.reveal());
+        for (index, card) in self.hand.iter().enumerate() {
+            println!("{} - {}", index, card.reveal());
         }
         println!(" ");
     }
