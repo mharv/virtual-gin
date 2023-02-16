@@ -4,6 +4,7 @@ use std::io;
 use phf::phf_map;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
+use regex::Regex;
 
 static RANK_VALUES: phf::Map<&'static str, i32> = phf_map! {
     "Ace" => 1,
@@ -213,10 +214,35 @@ impl GinGame {
                 _ => println!("Invalid command."),
             }
         }
+    }
 
+    fn awaiting_decision(&mut self) {
+        println!("decide which card you want to discard by typing \"d-N\" where is N is the number next to the card.");
+        //show hand of player who has current turn
+        let re = Regex::new(r"^d-\d{1,2}$").unwrap();
 
-        // next players turn.
-        self.set_next_turn();
+        let mut input = String::new();
+        loop {
+            input.clear();
+            io::stdin().read_line(&mut input).unwrap();
+
+            if !re.is_match(&input.trim()) {
+                println!("Invalid command. command is in wrong format");
+                continue;
+            }
+
+            let number = input.trim().split("-").collect::<Vec<&str>>()[1];
+            let number: usize = number.parse().unwrap();
+            if number > 10 {
+                println!("Invalid command. number too high");
+                continue;
+            }
+
+            match number {
+                0 => println!("discarding card 0"),
+                _ => println!("input is valid"),
+            }
+        }
     }
 
     fn decide_first_turn(&mut self) {
@@ -271,5 +297,7 @@ fn main() {
     loop {
         println!("{}", game.get_current_turn());
         game.awaiting_draw();
+        game.awaiting_decision();
+        game.set_next_turn();
     }
 }
