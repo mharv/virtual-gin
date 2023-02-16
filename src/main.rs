@@ -174,11 +174,10 @@ impl GinGame {
 
     fn awaiting_draw(&mut self) {
         println!("either draw a card from the deck (d1) or draw a card from the discard pile (d2) awaiting input...");
-        let temp_current_turn = self.current_turn.clone();
         let mut input = String::new();
 
         // should the below be something to do with state?
-        while self.get_current_turn() == temp_current_turn {
+        loop {
             input.clear();
             io::stdin().read_line(&mut input).unwrap();
             // need to put in get current player logic
@@ -191,6 +190,7 @@ impl GinGame {
                         self.deck.draw_card(&mut self.second_player.hand);
                         self.second_player.display_player_hand();
                     }
+                    break;
                 }
                 "d2" => {
                     if self.current_turn == self.first_player.name {
@@ -200,15 +200,18 @@ impl GinGame {
                         self.discard_pile.draw_card(&mut self.second_player.hand);
                         self.second_player.display_player_hand();
                     }
+                    break;
                 }
                 _ => println!("Invalid command."),
             }
+        }
 
-            if self.current_turn == self.first_player.name {
-                self.current_turn = self.second_player.name.clone();
-            } else {
-                self.current_turn = self.first_player.name.clone();
-            }
+
+        // next players turn.
+        if self.current_turn == self.first_player.name {
+            self.current_turn = self.second_player.name.clone();
+        } else {
+            self.current_turn = self.first_player.name.clone();
         }
     }
 
