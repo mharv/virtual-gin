@@ -220,7 +220,7 @@ impl GinGame {
         }
     }
 
-    fn awaiting_decision(&mut self) {
+    fn awaiting_discard(&mut self) {
         println!("decide which card you want to discard by typing \"d-N\" where is N is the number next to the card.");
         //show hand of player who has current turn
         let re = Regex::new(r"^d-\d{1,2}$").unwrap();
@@ -257,6 +257,34 @@ impl GinGame {
                         break;
                     }
                 }
+            }
+        }
+    }
+
+    fn awaiting_decision(&mut self) {
+        println!("would you like to knock (K), call gin (G) or neither (N)?");
+
+        let mut input = String::new();
+        loop {
+            input.clear();
+            io::stdin().read_line(&mut input).unwrap();
+
+            match input.trim() {
+                "K" => {
+                    println!("player knocked");
+                    self.knock_status = true;
+                    break;
+                }
+                "G" => {
+                    println!("player called gin");
+                    self.gin_status = true;
+                    break;
+                }
+                "N" => {
+                    println!("player did not knock");
+                    break;
+                }
+                _ => println!("invalid command."),
             }
         }
     }
@@ -313,6 +341,7 @@ fn main() {
     while !game.knock_status && !game.gin_status {
         println!("{}", game.get_current_turn());
         game.awaiting_draw();
+        game.awaiting_discard();
         game.awaiting_decision();
         game.set_next_turn();
     }
