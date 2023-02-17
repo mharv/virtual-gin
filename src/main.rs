@@ -129,6 +129,8 @@ struct GinGame {
     deck: Deck,
     discard_pile: DiscardPile,
     current_turn: String,
+    knock_status: bool,
+    gin_status: bool,
 }
 
 impl GinGame {
@@ -144,6 +146,8 @@ impl GinGame {
             deck,
             discard_pile,
             current_turn,
+            knock_status: false,
+            gin_status: false,
         }
     }
 
@@ -306,7 +310,7 @@ fn main() {
     game.second_player.display_player_hand();
     game.display_discard_pile();
 
-    loop {
+    while !game.knock_status && !game.gin_status {
         println!("{}", game.get_current_turn());
         game.awaiting_draw();
         game.awaiting_decision();
