@@ -345,4 +345,17 @@ fn main() {
         game.awaiting_decision();
         game.set_next_turn();
     }
+
+    // if gin, count deadwood of other player,
+    // add up and score +20 
+    //
+    // if knock, deadwood is compared
+    // if knocking player’s Deadwood value is equal to or greater than their 
+    // opponent's Deadwood value, they have been Undercut, Opponent gets 
+    // difference +10
+    //
+    // if deadwood is lower, knocking player gets difference +10
+    //
+    //
+    // record scores, do a match check for a winner.
 }
