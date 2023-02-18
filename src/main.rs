@@ -123,6 +123,20 @@ impl Player {
     }
 }
 
+struct GameResult {
+    points: i32,
+    player: String,
+}
+
+impl GameResult {
+    fn new() -> Self {
+        GameResult {
+            points: 0,
+            player: String::from(""),
+        }
+    }
+}
+
 struct GinGame {
     first_player: Player,
     second_player: Player,
@@ -131,6 +145,7 @@ struct GinGame {
     current_turn: String,
     knock_status: bool,
     gin_status: bool,
+    score: GameResult,
 }
 
 impl GinGame {
@@ -140,6 +155,7 @@ impl GinGame {
         let first_player = Player::new(first_player_name);
         let second_player = Player::new(second_player_name);
         let current_turn = String::from("");
+        let score = GameResult::new();
         GinGame {
             first_player,
             second_player,
@@ -148,7 +164,25 @@ impl GinGame {
             current_turn,
             knock_status: false,
             gin_status: false,
+            score,
         }
+    }
+
+    fn get_score(&self) {
+        if self.score.points != 0 {
+            // self.score
+            println!(
+                "player {} scored {} points",
+                self.score.player, self.score.points
+            );
+        } else {
+            println!("game has not been completed");
+        }
+    }
+    
+    fn set_score(&mut self, points: i32, player_name: String) {
+        self.score.points = points;
+        self.score.player = player_name;
     }
 
     fn deal_starting_hands(&mut self) {
@@ -347,11 +381,11 @@ fn main() {
     }
 
     // if gin, count deadwood of other player,
-    // add up and score +20 
+    // add up and score +20
     //
     // if knock, deadwood is compared
-    // if knocking player’s Deadwood value is equal to or greater than their 
-    // opponent's Deadwood value, they have been Undercut, Opponent gets 
+    // if knocking player’s Deadwood value is equal to or greater than their
+    // opponent's Deadwood value, they have been Undercut, Opponent gets
     // difference +10
     //
     // if deadwood is lower, knocking player gets difference +10
