@@ -179,7 +179,7 @@ impl GinGame {
             println!("game has not been completed");
         }
     }
-    
+
     fn set_score(&mut self, points: i32, player_name: String) {
         self.score.points = points;
         self.score.player = player_name;
@@ -196,13 +196,17 @@ impl GinGame {
 
     fn display_discard_pile(&self) {
         println!("Top card of discard pile: ");
-        if self.discard_pile.cards.len() == 0 {
-            println!("Discard pile is empty!");
+        if self.discard_pile.cards.len() != 0 {
+            if self.knock_status || self.gin_status {
+                println!("Face down!");
+            } else {
+                println!(
+                    "{}",
+                    self.discard_pile.cards[self.discard_pile.cards.len() - 1].reveal()
+                );
+            }
         } else {
-            println!(
-                "{}",
-                self.discard_pile.cards[self.discard_pile.cards.len() - 1].reveal()
-            );
+            println!("Discard pile is empty!");
         }
         println!(" ");
     }
@@ -254,6 +258,34 @@ impl GinGame {
         }
     }
 
+    fn awaiting_decision(&mut self) {
+        println!("would you like to knock (K), call gin (G) or neither (N)?");
+
+        let mut input = String::new();
+        loop {
+            input.clear();
+            io::stdin().read_line(&mut input).unwrap();
+
+            match input.trim() {
+                "K" => {
+                    println!("player knocked");
+                    self.knock_status = true;
+                    break;
+                }
+                "G" => {
+                    println!("player called gin");
+                    self.gin_status = true;
+                    break;
+                }
+                "N" => {
+                    println!("player did not knock");
+                    break;
+                }
+                _ => println!("invalid command."),
+            }
+        }
+    }
+
     fn awaiting_discard(&mut self) {
         println!("decide which card you want to discard by typing \"d-N\" where is N is the number next to the card.");
         //show hand of player who has current turn
@@ -291,34 +323,6 @@ impl GinGame {
                         break;
                     }
                 }
-            }
-        }
-    }
-
-    fn awaiting_decision(&mut self) {
-        println!("would you like to knock (K), call gin (G) or neither (N)?");
-
-        let mut input = String::new();
-        loop {
-            input.clear();
-            io::stdin().read_line(&mut input).unwrap();
-
-            match input.trim() {
-                "K" => {
-                    println!("player knocked");
-                    self.knock_status = true;
-                    break;
-                }
-                "G" => {
-                    println!("player called gin");
-                    self.gin_status = true;
-                    break;
-                }
-                "N" => {
-                    println!("player did not knock");
-                    break;
-                }
-                _ => println!("invalid command."),
             }
         }
     }
@@ -367,16 +371,19 @@ fn main() {
     let mut game = GinGame::new(String::from("Mitch"), String::from("Phoebe"));
     game.decide_first_turn();
     game.deal_starting_hands();
-
-    game.first_player.display_player_hand();
-    game.second_player.display_player_hand();
     game.display_discard_pile();
 
     while !game.knock_status && !game.gin_status {
         println!("{}", game.get_current_turn());
+        let player = game.first_player.name.clone();
+        if game.get_current_turn() == player {
+            game.first_player.display_player_hand();
+        } else {
+            game.second_player.display_player_hand();
+        }
         game.awaiting_draw();
-        game.awaiting_discard();
         game.awaiting_decision();
+        game.awaiting_discard();
         game.set_next_turn();
     }
 
