@@ -360,6 +360,58 @@ impl GinGame {
         }
     }
 
+    fn decide_melds(&mut self) {
+        println!("Create a new meld using C and add cards from your hand using d-N-X. where N is the card index and X is the meld index");
+        let re = Regex::new(r"^d-\d{1,2}-\d{1}$").unwrap();
+
+        let mut input = String::new();
+        loop {
+            let player = self.first_player.name.clone();
+            if self.get_current_turn() == player {
+                self.first_player.display_player_hand();
+            } else {
+                self.second_player.display_player_hand();
+            }
+
+            input.clear();
+            io::stdin().read_line(&mut input).unwrap();
+
+            if !re.is_match(&input.trim()) && input.trim() != "C" {
+                println!("Invalid command. command is in wrong format");
+                continue;
+            }
+
+            if input.trim() == "C" {
+                self.melds.create_new_meld();
+                self.melds.display_melds();
+                continue;
+            }
+
+            let card_index = input.trim().split("-").collect::<Vec<&str>>()[1];
+            let meld_index = input.trim().split("-").collect::<Vec<&str>>()[2];
+            let card_index: usize = card_index.parse().unwrap();
+            let meld_index: usize = meld_index.parse().unwrap();
+
+            if card_index > 9 || meld_index > self.melds.collection.len() {
+                println!("Invalid command.");
+                continue;
+            } else {
+                self.melds.display_melds();
+            }
+
+            let fp_name = self.first_player.name.clone();
+            if self.get_current_turn() == fp_name {
+                self.melds
+                    .add_to_meld(&mut self.first_player.hand, card_index, meld_index);
+                continue;
+            } else {
+                self.melds
+                    .add_to_meld(&mut self.second_player.hand, card_index, meld_index);
+                continue;
+            }
+        }
+    }
+
     fn decide_first_turn(&mut self) {
         loop {
             self.deck.shuffle_deck();
@@ -397,15 +449,6 @@ impl GinGame {
             }
         }
         println!(" ");
-    }
-
-    fn decide_melds(&mut self) {
-        let player = self.first_player.name.clone();
-        if self.get_current_turn() == player {
-            self.first_player.display_player_hand();
-        } else {
-            self.second_player.display_player_hand();
-        }
     }
 }
 
