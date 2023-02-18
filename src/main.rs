@@ -137,6 +137,36 @@ impl GameResult {
     }
 }
 
+struct Melds {
+    collection: Vec<Vec<Card>>,
+}
+
+impl Melds {
+    fn create() -> Self {
+        Melds {
+            collection: Vec::new(),
+        }
+    }
+
+    fn create_new_meld(&mut self) {
+        self.collection.push(Vec::new());
+    }
+
+    fn display_melds(&self) {
+        for (meld_index, meld) in self.collection.iter().enumerate() {
+            println!("Meld {}: {:?}", meld_index, meld);
+        }
+    }
+
+    fn add_to_meld(&mut self, origin: &mut Vec<Card>, card_index: usize, meld_index: usize) {
+        let card = origin.remove(card_index);
+        if let Some(elem) = self.collection.get_mut(meld_index) {
+            elem.push(card);
+            println!("Meld {}: {:?}", meld_index, elem);
+        }
+    }
+}
+
 struct GinGame {
     first_player: Player,
     second_player: Player,
@@ -146,6 +176,7 @@ struct GinGame {
     knock_status: bool,
     gin_status: bool,
     score: GameResult,
+    melds: Melds,
 }
 
 impl GinGame {
@@ -156,6 +187,7 @@ impl GinGame {
         let second_player = Player::new(second_player_name);
         let current_turn = String::from("");
         let score = GameResult::new();
+        let melds = Melds::create();
         GinGame {
             first_player,
             second_player,
@@ -165,6 +197,7 @@ impl GinGame {
             knock_status: false,
             gin_status: false,
             score,
+            melds,
         }
     }
 
@@ -365,6 +398,15 @@ impl GinGame {
         }
         println!(" ");
     }
+
+    fn decide_melds(&mut self) {
+        let player = self.first_player.name.clone();
+        if self.get_current_turn() == player {
+            self.first_player.display_player_hand();
+        } else {
+            self.second_player.display_player_hand();
+        }
+    }
 }
 
 fn main() {
@@ -386,6 +428,8 @@ fn main() {
         game.awaiting_discard();
         game.set_next_turn();
     }
+
+    game.decide_melds();
 
     // if gin, count deadwood of other player,
     // add up and score +20
