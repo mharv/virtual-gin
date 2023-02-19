@@ -159,12 +159,10 @@ impl Melds {
     }
 
     fn add_to_meld(&mut self, origin: &mut Vec<Card>, card_index: usize, meld_index: usize) {
-        if card_index < origin.len() {
-            let card = origin.remove(card_index);
-            if let Some(elem) = self.collection.get_mut(meld_index) {
-                elem.push(card);
-                self.display_melds();
-            }
+        let card = origin.remove(card_index);
+        if let Some(elem) = self.collection.get_mut(meld_index) {
+            elem.push(card);
+            self.display_melds();
         }
     }
 }
@@ -395,17 +393,25 @@ impl GinGame {
             let meld_index: usize = meld_index.parse().unwrap();
 
             // this should be dynamic
-            if card_index > 9 || meld_index >= self.melds.collection.len() {
+            if meld_index >= self.melds.collection.len() {
                 println!("Invalid command.");
                 continue;
-            } 
+            }
 
             let fp_name = self.first_player.name.clone();
             if self.get_current_turn() == fp_name {
+                if card_index >= self.first_player.hand.len() {
+                    println!("Invalid command.");
+                    continue;
+                }
                 self.melds
                     .add_to_meld(&mut self.first_player.hand, card_index, meld_index);
                 continue;
             } else {
+                if card_index >= self.second_player.hand.len() {
+                    println!("Invalid command.");
+                    continue;
+                }
                 self.melds
                     .add_to_meld(&mut self.second_player.hand, card_index, meld_index);
                 continue;
