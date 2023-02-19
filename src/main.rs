@@ -104,6 +104,7 @@ impl Deck {
 struct Player {
     name: String,
     hand: Vec<Card>,
+    melds: Melds,
 }
 
 impl Player {
@@ -111,6 +112,7 @@ impl Player {
         Player {
             name,
             hand: Vec::new(),
+            melds: Melds::create(),
         }
     }
 
@@ -181,7 +183,6 @@ struct GinGame {
     knock_status: bool,
     gin_status: bool,
     score: GameResult,
-    melds: Melds,
 }
 
 impl GinGame {
@@ -192,7 +193,6 @@ impl GinGame {
         let second_player = Player::new(second_player_name);
         let current_turn = String::from("");
         let score = GameResult::new();
-        let melds = Melds::create();
         GinGame {
             first_player,
             second_player,
@@ -202,7 +202,6 @@ impl GinGame {
             knock_status: false,
             gin_status: false,
             score,
-            melds,
         }
     }
 
@@ -366,7 +365,7 @@ impl GinGame {
     }
 
     fn decide_melds(&mut self) {
-        println!("Create a new meld using C and add cards from your hand using d-N-X. where N is the card index and X is the meld index");
+        println!("Create a new meld using C and add cards from your hand using d-N-X. where N is the card index and X is the meld index, use D when finished.");
         let re = Regex::new(r"^d-\d{1,2}-\d{1}$").unwrap();
 
         let mut input = String::new();
@@ -381,15 +380,26 @@ impl GinGame {
             input.clear();
             io::stdin().read_line(&mut input).unwrap();
 
-            if !re.is_match(&input.trim()) && input.trim() != "C" {
+            if !re.is_match(&input.trim()) && input.trim() != "C" && input.trim() != "D" {
                 println!("Invalid command. command is in wrong format");
                 continue;
             }
 
+            if input.trim() == "D" {
+                println!("player done creating melds!");
+                break;
+            }
+
             if input.trim() == "C" {
-                self.melds.create_new_meld();
-                self.melds.display_melds();
-                continue;
+                if self.get_current_turn() == player {
+                    self.first_player.melds.create_new_meld();
+                    self.first_player.melds.display_melds();
+                    continue;
+                } else {
+                    self.second_player.melds.create_new_meld();
+                    self.second_player.melds.display_melds();
+                    continue;
+                }
             }
 
             let card_index = input.trim().split("-").collect::<Vec<&str>>()[1];
@@ -397,28 +407,33 @@ impl GinGame {
             let card_index: usize = card_index.parse().unwrap();
             let meld_index: usize = meld_index.parse().unwrap();
 
-            // this should be dynamic
-            if meld_index >= self.melds.collection.len() {
-                println!("Invalid command.");
-                continue;
-            }
-
-            let fp_name = self.first_player.name.clone();
-            if self.get_current_turn() == fp_name {
-                if card_index >= self.first_player.hand.len() {
+            if self.get_current_turn() == player {
+                if meld_index >= self.first_player.melds.collection.len()
+                    || card_index >= self.first_player.hand.len()
+                {
                     println!("Invalid command.");
                     continue;
                 }
-                self.melds
-                    .add_to_meld(&mut self.first_player.hand, card_index, meld_index);
+
+                self.first_player.melds.add_to_meld(
+                    &mut self.first_player.hand,
+                    card_index,
+                    meld_index,
+                );
+
                 continue;
             } else {
-                if card_index >= self.second_player.hand.len() {
+                if meld_index >= self.second_player.melds.collection.len()
+                    || card_index >= self.second_player.hand.len()
+                {
                     println!("Invalid command.");
                     continue;
                 }
-                self.melds
-                    .add_to_meld(&mut self.second_player.hand, card_index, meld_index);
+                self.second_player.melds.add_to_meld(
+                    &mut self.second_player.hand,
+                    card_index,
+                    meld_index,
+                );
                 continue;
             }
         }
@@ -481,9 +496,13 @@ fn main() {
         game.awaiting_draw();
         game.awaiting_decision();
         game.awaiting_discard();
-        game.set_next_turn();
+        if !game.knock_status && !game.gin_status {
+            game.set_next_turn();
+        }
     }
 
+    game.decide_melds();
+    game.set_next_turn();
     game.decide_melds();
 
     // if gin, count deadwood of other player,
