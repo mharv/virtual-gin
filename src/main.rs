@@ -152,6 +152,11 @@ impl Melds {
         self.collection.push(Vec::new());
     }
 
+    fn remove_meld() {
+        // should add all cards back to players hand, then remove the meld using index
+        unimplemented!();
+    }
+
     fn display_melds(&self) {
         for (meld_index, meld) in self.collection.iter().enumerate() {
             println!("Meld {}: {:?}", meld_index, meld);
