@@ -183,7 +183,6 @@ struct GinGame {
     knock_status: bool,
     gin_status: bool,
     score: GameResult,
-    winner: String,
 }
 
 impl GinGame {
