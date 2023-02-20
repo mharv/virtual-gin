@@ -439,6 +439,75 @@ impl GinGame {
         }
     }
 
+    fn add_to_melds(&mut self) {
+        println!("add cards from your hand to your opponents melds by using d-N-X. where N is the card index and X is the meld index, use D when finished.");
+        let re = Regex::new(r"^d-\d{1,2}-\d{1}$").unwrap();
+
+        let mut input = String::new();
+        loop {
+            let player = self.first_player.name.clone();
+            if self.get_current_turn() == player {
+                self.first_player.display_player_hand();
+            } else {
+                self.second_player.display_player_hand();
+            }
+
+            input.clear();
+            io::stdin().read_line(&mut input).unwrap();
+
+            if !re.is_match(&input.trim()) && input.trim() != "C" && input.trim() != "D" {
+                println!("Invalid command. command is in wrong format");
+                continue;
+            }
+
+            if input.trim() == "D" {
+                println!("player done adding to opponents melds!");
+                break;
+            }
+
+            if self.get_current_turn() == player {
+                self.second_player.melds.display_melds();
+            } else {
+                self.first_player.melds.display_melds();
+            }
+
+            let card_index = input.trim().split("-").collect::<Vec<&str>>()[1];
+            let meld_index = input.trim().split("-").collect::<Vec<&str>>()[2];
+            let card_index: usize = card_index.parse().unwrap();
+            let meld_index: usize = meld_index.parse().unwrap();
+
+            if self.get_current_turn() == player {
+                if meld_index >= self.second_player.melds.collection.len()
+                    || card_index >= self.first_player.hand.len()
+                {
+                    println!("Invalid command.");
+                    continue;
+                }
+
+                self.second_player.melds.add_to_meld(
+                    &mut self.first_player.hand,
+                    card_index,
+                    meld_index,
+                );
+
+                continue;
+            } else {
+                if meld_index >= self.first_player.melds.collection.len()
+                    || card_index >= self.second_player.hand.len()
+                {
+                    println!("Invalid command.");
+                    continue;
+                }
+                self.first_player.melds.add_to_meld(
+                    &mut self.second_player.hand,
+                    card_index,
+                    meld_index,
+                );
+                continue;
+            }
+        }
+    }
+
     fn decide_first_turn(&mut self) {
         loop {
             self.deck.shuffle_deck();
@@ -504,6 +573,9 @@ fn main() {
     game.decide_melds();
     game.set_next_turn();
     game.decide_melds();
+    // do something after this to add to knocking players melds
+    game.add_to_melds();
+    // game.calculate_score();
 
     // if gin, count deadwood of other player,
     // add up and score +20
