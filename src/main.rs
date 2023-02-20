@@ -222,6 +222,45 @@ impl GinGame {
         self.score.player = player_name;
     }
 
+    fn decide_first_turn(&mut self) {
+        loop {
+            self.deck.shuffle_deck();
+
+            let (first_player_card, second_player_card) = self.deck.peek_two();
+
+            println!(
+                "{}'s card is {}",
+                self.first_player.name,
+                first_player_card.reveal()
+            );
+            println!(
+                "{}'s card is {}",
+                self.second_player.name,
+                second_player_card.reveal()
+            );
+
+            if RANK_VALUES.get(&first_player_card.rank) == RANK_VALUES.get(&second_player_card.rank)
+            {
+                println!("Draw again!");
+                println!(" ");
+            }
+
+            if RANK_VALUES.get(&first_player_card.rank) > RANK_VALUES.get(&second_player_card.rank)
+            {
+                println!("{} goes first.", self.first_player.name);
+                self.current_turn = self.first_player.name.clone();
+                break;
+            }
+            if RANK_VALUES.get(&first_player_card.rank) < RANK_VALUES.get(&second_player_card.rank)
+            {
+                println!("{} goes first.", self.second_player.name);
+                self.current_turn = self.second_player.name.clone();
+                break;
+            }
+        }
+        println!(" ");
+    }
+
     fn deal_starting_hands(&mut self) {
         self.deck.shuffle_deck();
         for _ in 0..10 {
@@ -508,44 +547,6 @@ impl GinGame {
         }
     }
 
-    fn decide_first_turn(&mut self) {
-        loop {
-            self.deck.shuffle_deck();
-
-            let (first_player_card, second_player_card) = self.deck.peek_two();
-
-            println!(
-                "{}'s card is {}",
-                self.first_player.name,
-                first_player_card.reveal()
-            );
-            println!(
-                "{}'s card is {}",
-                self.second_player.name,
-                second_player_card.reveal()
-            );
-
-            if RANK_VALUES.get(&first_player_card.rank) == RANK_VALUES.get(&second_player_card.rank)
-            {
-                println!("Draw again!");
-                println!(" ");
-            }
-
-            if RANK_VALUES.get(&first_player_card.rank) > RANK_VALUES.get(&second_player_card.rank)
-            {
-                println!("{} goes first.", self.first_player.name);
-                self.current_turn = self.first_player.name.clone();
-                break;
-            }
-            if RANK_VALUES.get(&first_player_card.rank) < RANK_VALUES.get(&second_player_card.rank)
-            {
-                println!("{} goes first.", self.second_player.name);
-                self.current_turn = self.second_player.name.clone();
-                break;
-            }
-        }
-        println!(" ");
-    }
 }
 
 fn main() {
