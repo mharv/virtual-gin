@@ -183,6 +183,7 @@ struct GinGame {
     knock_status: bool,
     gin_status: bool,
     score: GameResult,
+    winner: String,
 }
 
 impl GinGame {
@@ -547,6 +548,73 @@ impl GinGame {
         }
     }
 
+    fn calculate_score(&mut self) {
+        let player = self.first_player.name.clone();
+
+        let mut first_player_deadwood: i32 = 0;
+        let mut second_player_deadwood: i32 = 0;
+
+        for card in self.first_player.hand.iter() {
+            first_player_deadwood += RANK_VALUES.get(&card.rank).unwrap();
+        }
+
+        for card in self.second_player.hand.iter() {
+            second_player_deadwood += RANK_VALUES.get(&card.rank).unwrap();
+        }
+        if self.get_current_turn() == player {
+            // second_player knocked or ginned
+            if self.knock_status {
+                // check for Undercut
+                if second_player_deadwood >= first_player_deadwood {
+                    println!("UNDERCUT!");
+                    self.set_score(
+                        second_player_deadwood - first_player_deadwood + 10,
+                        self.first_player.name.clone(),
+                    );
+                } else {
+                    println!("NOT UNDERCUT!");
+                    self.set_score(
+                        first_player_deadwood - second_player_deadwood + 10,
+                        self.second_player.name.clone(),
+                    );
+                }
+            }
+            if self.gin_status {
+                // no undercut check here.
+                println!("GIN!");
+                self.set_score(
+                    first_player_deadwood - second_player_deadwood + 20,
+                    self.second_player.name.clone(),
+                );
+            }
+        } else {
+            // first_player knocked or ginned
+            if self.knock_status {
+                // check for Undercut
+                if first_player_deadwood >= second_player_deadwood {
+                    println!("UNDERCUT!");
+                    self.set_score(
+                        first_player_deadwood - second_player_deadwood + 10,
+                        self.second_player.name.clone(),
+                    );
+                } else {
+                    println!("NOT UNDERCUT!");
+                    self.set_score(
+                        second_player_deadwood - first_player_deadwood + 10,
+                        self.first_player.name.clone(),
+                    );
+                }
+            }
+            if self.gin_status {
+                // no undercut check here.
+                println!("GIN!");
+                self.set_score(
+                    second_player_deadwood - first_player_deadwood + 20,
+                    self.first_player.name.clone(),
+                );
+            }
+        }
+    }
 }
 
 fn main() {
@@ -576,18 +644,9 @@ fn main() {
     game.decide_melds();
     // do something after this to add to knocking players melds
     game.add_to_melds();
-    // game.calculate_score();
+    game.calculate_score();
+    game.get_score();
 
-    // if gin, count deadwood of other player,
-    // add up and score +20
-    //
-    // if knock, deadwood is compared
-    // if knocking player’s Deadwood value is equal to or greater than their
-    // opponent's Deadwood value, they have been Undercut, Opponent gets
-    // difference +10
-    //
-    // if deadwood is lower, knocking player gets difference +10
-    //
-    //
-    // record scores, do a match check for a winner.
+    // we need to loop this now
+
 }
