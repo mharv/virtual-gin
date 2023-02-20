@@ -174,6 +174,106 @@ impl Melds {
     }
 }
 
+struct PlayerTotal {
+    score: i32,
+    name: String,
+}
+
+impl PlayerTotal {
+    fn new(name: String) -> Self {
+        PlayerTotal { score: 0, name }
+    }
+}
+
+struct GinMatch {
+    games: Vec<GinGame>,
+    first_player_total: PlayerTotal,
+    second_player_total: PlayerTotal,
+}
+
+impl GinMatch {
+    fn create_match(first_player_name: String, second_player_name: String) -> Self {
+        GinMatch {
+            games: Vec::new(),
+            first_player_total: PlayerTotal::new(first_player_name.clone()),
+            second_player_total: PlayerTotal::new(second_player_name.clone()),
+        }
+    }
+
+    fn print_scores(&self) {
+        let mut first_player_total = 0;
+        let mut second_player_total = 0;
+        for game in self.games.iter() {
+            if game.score.player == self.first_player_total.name {
+                first_player_total += self.first_player_total.score;
+            } else {
+                second_player_total += self.second_player_total.score;
+            }
+        }
+        println!("{}'s current score is {}", self.first_player_total.name, first_player_total);
+        println!("{}'s current score is {}", self.second_player_total.name, second_player_total);
+    }
+
+    fn check_scores(&self) -> bool {
+        let mut first_player_total = 0;
+        let mut second_player_total = 0;
+        for game in self.games.iter() {
+            if game.score.player == self.first_player_total.name {
+                first_player_total += self.first_player_total.score;
+            } else {
+                second_player_total += self.second_player_total.score;
+            }
+            if first_player_total >= 100 {
+                println!("{} wins!", self.first_player_total.name);
+                return true;
+            }
+            if second_player_total >= 100 {
+                println!("{} wins!", self.second_player_total.name);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    fn start_match(&mut self) {
+        while !self.check_scores() {
+            let mut game = GinGame::new(
+                self.first_player_total.name.clone(),
+                self.second_player_total.name.clone(),
+            );
+            game.decide_first_turn();
+            game.deal_starting_hands();
+            game.display_discard_pile();
+
+            while !game.knock_status && !game.gin_status {
+                println!("{}", game.get_current_turn());
+                let player = game.first_player.name.clone();
+                if game.get_current_turn() == player {
+                    game.first_player.display_player_hand();
+                } else {
+                    game.second_player.display_player_hand();
+                }
+                game.awaiting_draw();
+                game.awaiting_decision();
+                game.awaiting_discard();
+                if !game.knock_status && !game.gin_status {
+                    game.set_next_turn();
+                }
+            }
+
+            game.decide_melds();
+            game.set_next_turn();
+            game.decide_melds();
+            // do something after this to add to knocking players melds
+            game.add_to_melds();
+            game.calculate_score();
+            game.get_score();
+            self.print_scores();
+            self.games.push(game);
+        }
+    }
+}
+
 struct GinGame {
     first_player: Player,
     second_player: Player,
@@ -617,35 +717,6 @@ impl GinGame {
 }
 
 fn main() {
-    let mut game = GinGame::new(String::from("Mitch"), String::from("Phoebe"));
-    game.decide_first_turn();
-    game.deal_starting_hands();
-    game.display_discard_pile();
-
-    while !game.knock_status && !game.gin_status {
-        println!("{}", game.get_current_turn());
-        let player = game.first_player.name.clone();
-        if game.get_current_turn() == player {
-            game.first_player.display_player_hand();
-        } else {
-            game.second_player.display_player_hand();
-        }
-        game.awaiting_draw();
-        game.awaiting_decision();
-        game.awaiting_discard();
-        if !game.knock_status && !game.gin_status {
-            game.set_next_turn();
-        }
-    }
-
-    game.decide_melds();
-    game.set_next_turn();
-    game.decide_melds();
-    // do something after this to add to knocking players melds
-    game.add_to_melds();
-    game.calculate_score();
-    game.get_score();
-
-    // we need to loop this now
-
+    let mut gin_match = GinMatch::create_match(String::from("Mitch"), String::from("Phoebe"));
+    gin_match.start_match();
 }
