@@ -267,6 +267,7 @@ impl GinMatch {
             // do something after this to add to knocking players melds
             game.add_to_melds();
             game.calculate_score();
+            game.dd();
             game.get_score();
             self.print_scores();
             self.games.push(game);
